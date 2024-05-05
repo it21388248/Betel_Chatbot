@@ -20,10 +20,13 @@ const Login = () => {
 
     try {
       dispatch(showLoading());
-      const res = await axios.post("http://localhost:8000/api/v1/user/login", {
-        ...values,
-        role: selectedRole,
-      });
+      const res = await axios.post(
+        "https://nasaapplication-production.up.railway.app/api/v1/user/login",
+        {
+          ...values,
+          role: selectedRole,
+        }
+      );
       console.log("Login response:", res);
       dispatch(hideLoading());
 
