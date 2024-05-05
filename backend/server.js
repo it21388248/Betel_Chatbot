@@ -13,7 +13,7 @@ connectDB();
 
 // Initialize Express app
 const app = express();
-app.use(cors);
+app.use(cors());
 /* app.use(
   cors({
     origin: ["https:/deploy-NASA-APP.vercel.app"],
