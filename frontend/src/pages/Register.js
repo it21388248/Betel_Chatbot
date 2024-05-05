@@ -15,7 +15,7 @@ const Register = () => {
     try {
       dispatch(showLoading());
       const res = await axios.post(
-        "http://localhost:8000/api/v1/user/register",
+        "https://nasaapplication-production.up.railway.app/api/v1/user/register",
         {
           ...values,
           role: userRole,

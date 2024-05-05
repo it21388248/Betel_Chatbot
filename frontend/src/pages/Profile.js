@@ -15,7 +15,7 @@ const Profile = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:8000/api/v1/profile/profile",
+        "https://nasaapplication-production.up.railway.app/api/v1/profile/profile",
         {
           headers: {
             Authorization: `Bearer ${token}`,
