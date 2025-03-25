@@ -30,35 +30,45 @@ const APOD = () => {
   return (
     <div>
       <Header />
-
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold mb-4">
+        <h2 className="text-2xl font-bold mb-4 text-center sm:text-left">
           Astronomy Picture of the Day
         </h2>
         {error ? (
-          <p className="text-red-600">{error}</p>
+          <p className="text-red-600 text-center sm:text-left">{error}</p>
         ) : (
           apodData && (
             <div>
               {apodData.media_type === "image" ? (
-                <img src={apodData.url} alt={apodData.title} className="mb-4" />
+                <img
+                  src={apodData.url}
+                  alt={apodData.title}
+                  className="mb-4 w-full h-auto object-cover"
+                />
               ) : apodData.media_type === "video" ? (
                 <div className="video-container mb-4">
                   <iframe
                     title={apodData.title}
-                    width="560"
+                    width="100%"
                     height="315"
                     src={apodData.url}
                     frameBorder="0"
                     allowFullScreen
+                    className="w-full h-64 sm:h-96"
                   ></iframe>
                 </div>
               ) : (
                 <p className="text-red-600">Unsupported media type</p>
               )}
-              <p className="text-gray-700">{apodData.date}</p>
-              <p className="text-xl font-semibold mb-2">{apodData.title}</p>
-              <p className="text-gray-800">{apodData.explanation}</p>
+              <p className="text-gray-700 text-center sm:text-left">
+                {apodData.date}
+              </p>
+              <p className="text-xl font-semibold mb-2 text-center sm:text-left">
+                {apodData.title}
+              </p>
+              <p className="text-gray-800 text-justify">
+                {apodData.explanation}
+              </p>
             </div>
           )
         )}
