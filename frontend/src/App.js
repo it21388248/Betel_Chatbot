@@ -22,6 +22,7 @@ import ConfirmLeadPulse from "./pages/leadpulse/ConfirmLeadPulse";
 import Chatbot from "./Chatbot/Chatbot";
 import UploadPDF from "./Chatbot/UploadPDF";
 import Navbar from "./Chatbot/Navbar";
+import UploadedFiles from "./Chatbot/UploadedFiles";
 
 export default function App() {
   const heroData = [
@@ -63,6 +64,7 @@ export default function App() {
 
         <Route path="/chat" element={<Chatbot />} />
         <Route path="/upload" element={<UploadPDF />} />
+        <Route path="/files" element={<UploadedFiles />} />
 
         <Route path="/register" element={<Register />} />
         <Route path="/apod" element={<APOD />} />

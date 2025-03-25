@@ -12,6 +12,8 @@ app.use(express.json());
 // Initialize Pinecone
 initializePinecone();
 
+// ✅ Serve uploaded files as static files
+app.use("/uploads", express.static("uploads"));
 app.use("/api/files", fileRoutes);
 app.use("/api/chat", chatRoutes);
 
