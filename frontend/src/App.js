@@ -21,6 +21,7 @@ import ConfirmLeadPulse from "./pages/leadpulse/ConfirmLeadPulse";
 
 import Chatbot from "./Chatbot/Chatbot";
 import UploadPDF from "./Chatbot/UploadPDF";
+import Navbar from "./Chatbot/Navbar";
 
 export default function App() {
   const heroData = [
@@ -34,6 +35,7 @@ export default function App() {
 
   return (
     <Router>
+      <Navbar />
       <Routes>
         <Route
           path="/"
@@ -47,7 +49,7 @@ export default function App() {
           //   />
           // }
 
-          element={<SignUp />}
+          element={<Home />}
         />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/login" element={<Login />} />
