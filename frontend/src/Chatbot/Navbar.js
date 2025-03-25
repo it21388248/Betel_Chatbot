@@ -5,7 +5,7 @@ const Navbar = () => {
   return (
     <nav className="bg-gray-800 p-4 flex justify-between text-white">
       <Link to="/" className="text-lg font-bold">
-        Chat with PDF
+        BetelBrio
       </Link>
       <div className="space-x-4">
         <Link to="/upload" className="hover:underline">

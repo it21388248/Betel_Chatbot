@@ -13,15 +13,19 @@ const Chatbot = () => {
     if (!input.trim()) return;
 
     const newMessage = { sender: "user", text: input };
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
 
     try {
+      // Set messages correctly, keeping previous messages and adding new one
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+
       const response = await axios.post("http://localhost:5000/api/chat", {
         message: input,
       });
 
       const botReply = { sender: "bot", text: response.data.reply };
-      setMessages((prevMessages) => [...prevMessages, newMessage, botReply]);
+
+      // Add bot reply to messages state
+      setMessages((prevMessages) => [...prevMessages, botReply]);
     } catch (error) {
       console.error("Error:", error);
       setMessages((prevMessages) => [
@@ -30,7 +34,7 @@ const Chatbot = () => {
       ]);
     }
 
-    setInput("");
+    setInput(""); // Clear input after sending
   };
 
   return (
