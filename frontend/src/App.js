@@ -18,7 +18,9 @@ import ConfigurePulses from "./pages/leadpulse/ConfigurePulses";
 import MapLeadPoints from "./pages/leadpulse/MapLeadPoints";
 import SetupIntegration from "./pages/leadpulse/SetupIntegration";
 import ConfirmLeadPulse from "./pages/leadpulse/ConfirmLeadPulse";
+
 import Chatbot from "./Chatbot/Chatbot";
+import UploadPDF from "./Chatbot/UploadPDF";
 
 export default function App() {
   const heroData = [
@@ -58,6 +60,7 @@ export default function App() {
         <Route path="/step4" element={<ConfirmLeadPulse />} />
 
         <Route path="/chat" element={<Chatbot />} />
+        <Route path="/upload" element={<UploadPDF />} />
 
         <Route path="/register" element={<Register />} />
         <Route path="/apod" element={<APOD />} />

@@ -9,7 +9,7 @@ const Chatbot = () => {
     if (!input.trim()) return;
 
     const newMessage = { sender: "user", text: input };
-    setMessages([...messages, newMessage]);
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
 
     try {
       const response = await axios.post("http://localhost:5000/api/chat", {
@@ -17,12 +17,11 @@ const Chatbot = () => {
       });
 
       const botReply = { sender: "bot", text: response.data.reply };
-      setMessages([...messages, newMessage, botReply]);
+      setMessages((prevMessages) => [...prevMessages, newMessage, botReply]);
     } catch (error) {
-      console.error("Error sending message:", error);
-      setMessages([
-        ...messages,
-        newMessage,
+      console.error("Error:", error);
+      setMessages((prevMessages) => [
+        ...prevMessages,
         { sender: "bot", text: "Error: Could not get a response." },
       ]);
     }
