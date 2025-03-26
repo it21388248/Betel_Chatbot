@@ -14,7 +14,11 @@ const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const { uploadPDF, listUploadedFiles } = require("../controllers/fileController");
+const {
+  uploadPDF,
+  listUploadedFiles,
+  deleteFile,
+} = require("../controllers/fileController");
 
 const router = express.Router();
 
@@ -40,5 +44,8 @@ router.post("/upload", upload.single("file"), uploadPDF);
 
 // ✅ List Uploaded PDFs Route
 router.get("/list", listUploadedFiles);
+
+// ✅ Delete PDF Route
+router.delete("/delete/:id", deleteFile);
 
 module.exports = router;
