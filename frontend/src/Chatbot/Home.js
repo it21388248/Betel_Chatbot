@@ -1,24 +1,26 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import UploadModal from "./UploadModal";
+import UploadedFiles from "./UploadedFiles";
 
 const Home = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+
+  const handleUploadSuccess = () => {
+    setRefresh(!refresh); // Trigger re-fetching uploaded files
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-3xl font-bold mb-6">Welcome to Chat with PDF</h1>
-      <div className="space-x-4">
-        <Link
-          to="/upload"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-        >
-          Upload PDF
-        </Link>
-        <Link
-          to="/chat"
-          className="bg-green-600 text-white px-4 py-2 rounded-lg"
-        >
-          Chatbot
-        </Link>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">📂 Knowledge</h1>
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg" onClick={() => setShowModal(true)}>
+          + New Data Source
+        </button>
       </div>
+
+      {showModal && <UploadModal onClose={() => setShowModal(false)} onUploadSuccess={handleUploadSuccess} />}
+      <UploadedFiles key={refresh} />
     </div>
   );
 };
