@@ -4,9 +4,6 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import DetectLanguage from "detectlanguage";
-
-const detectlanguage = new DetectLanguage("1dc19ee0dfa61efae9874d97ae344829"); // Replace with your API Key
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
@@ -15,28 +12,22 @@ const Chatbot = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
+    const newMessage = { sender: "user", text: input };
+
     try {
-      // Detect language using DetectLanguage API
-      const detectionResult = await detectlanguage.detect(input);
-      const detectedLang = detectionResult[0]?.language || "en";
-      const isSinhala = detectedLang === "si";
-
-      const newMessage = {
-        sender: "user",
-        text: input,
-        lang: isSinhala ? "si" : "en",
-      };
-
       setMessages((prevMessages) => [...prevMessages, newMessage]);
 
       const response = await axios.post("http://localhost:5000/api/chat", {
         message: input,
       });
 
+      const botReplyText = response.data.reply;
+
       const botReply = {
         sender: "bot",
-        text: response.data.reply,
-        lang: isSinhala ? "si" : "en",
+        text: botReplyText.includes("No relevant information")
+          ? "⚠️ I can only answer based on the uploaded knowledge base. No relevant information was found."
+          : botReplyText,
       };
 
       setMessages((prevMessages) => [...prevMessages, botReply]);
@@ -44,11 +35,7 @@ const Chatbot = () => {
       console.error("Error:", error);
       setMessages((prevMessages) => [
         ...prevMessages,
-        {
-          sender: "bot",
-          text: "⚠️ **Error**: Could not get a response.",
-          lang: "en",
-        },
+        { sender: "bot", text: "⚠️ **Error**: Could not get a response." },
       ]);
     }
 
@@ -67,10 +54,6 @@ const Chatbot = () => {
                 ? "bg-blue-500 text-white self-end ml-auto text-right"
                 : "bg-gray-300 text-black self-start"
             }`}
-            style={{
-              fontFamily:
-                msg.lang === "si" ? "Iskoola Pota, sans-serif" : "inherit",
-            }}
           >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -109,7 +92,7 @@ const Chatbot = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           className="flex-grow p-2 border rounded-l-lg"
-          placeholder="Type a message..."
+          placeholder="Type a question..."
         />
         <button
           onClick={sendMessage}
