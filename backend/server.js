@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const fileRoutes = require("./routes/fileRoutes");
 const chatRoutes = require("./routes/chatRoutes");
-const { initializePinecone } = require("./config/pinecone"); // ✅ Use separate Pinecone setup
+const { initializePinecone } = require("./config/pinecone");
 
 const app = express();
 app.use(cors());
