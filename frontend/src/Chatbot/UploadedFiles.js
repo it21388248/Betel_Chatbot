@@ -16,6 +16,22 @@ const UploadedFiles = () => {
     }
   };
 
+  const deleteFile = async (id, filename) => {
+    const confirm = window.confirm(
+      `Are you sure you want to delete "${filename}"?`
+    );
+    if (!confirm) return;
+
+    try {
+      await axios.delete(`http://localhost:5000/api/files/delete/${id}`);
+      alert("✅ File deleted successfully.");
+      fetchFiles(); // Refresh after deletion
+    } catch (error) {
+      console.error("❌ Error deleting file:", error);
+      alert("⚠️ Failed to delete file.");
+    }
+  };
+
   useEffect(() => {
     fetchFiles();
   }, []);
@@ -34,22 +50,32 @@ const UploadedFiles = () => {
             <tr className="bg-gray-100">
               <th className="border p-2">Filename</th>
               <th className="border p-2">Uploaded At</th>
-              <th className="border p-2">Action</th>
+              <th className="border p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {files.map((file, index) => (
               <tr key={index} className="text-center">
                 <td className="border p-2">{file.filename}</td>
-                <td className="border p-2">{new Date(file.timestamp).toLocaleString()}</td>
                 <td className="border p-2">
+                  {new Date(file.timestamp).toLocaleString()}
+                </td>
+                <td className="border p-2 space-x-2">
                   <a
                     href={`http://localhost:5000/uploads/${file.filename}`}
                     download={file.filename}
-                    className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-700"
+                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
                   >
                     Download
                   </a>
+                  {file.id && (
+                    <button
+                      onClick={() => deleteFile(file.id, file.filename)}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
