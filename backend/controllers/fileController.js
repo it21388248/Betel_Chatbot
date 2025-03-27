@@ -45,17 +45,31 @@ async function uploadPDF(req, res) {
     const embedding = await getEmbedding(extractedText);
 
     const index = getIndex();
-    await index.upsert([
-      {
-        id: fileId,
-        values: embedding,
-        metadata: {
-          text: extractedText,
-          filename: sanitizedFilename,
-          timestamp: Date.now(),
+
+    // Split text into chunks — e.g., each Q&A block or each line
+    const chunks = extractedText
+  .split(/\n(?=Q:\s)/) // splits each Q: entry into its own block
+  .map(chunk => chunk.trim())
+  .filter(chunk => chunk.length > 0);
+
+    // Store each chunk separately with a unique ID
+    for (const chunk of chunks) {
+      const chunkId = uuidv4();
+      const embedding = await getEmbedding(chunk);
+
+      await index.upsert([
+        {
+          id: chunkId,
+          values: embedding,
+          metadata: {
+            text: chunk,
+            filename: sanitizedFilename,
+            fileId,
+            timestamp: Date.now(),
+          },
         },
-      },
-    ]);
+      ]);
+    }
 
     uploadedFiles.push({
       id: fileId,
@@ -92,13 +106,15 @@ async function deleteFile(req, res) {
 
     uploadedFiles = uploadedFiles.filter((f) => f.id !== id);
 
-    return res.json({ success: true, message: `File "${fileRecord.filename}" deleted.` });
+    return res.json({
+      success: true,
+      message: `File "${fileRecord.filename}" deleted.`,
+    });
   } catch (error) {
     console.error("❌ Delete Error:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-
 
 // ✅ Export all functions
 module.exports = { uploadPDF, listUploadedFiles, deleteFile };
