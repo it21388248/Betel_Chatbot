@@ -1,21 +1,18 @@
 const fs = require("fs");
 const path = require("path");
-const { extractTextFromPDF } = require("../utils/extractText");
+const { extractTextFromFile } = require("../utils/extractText");
 const { getEmbedding } = require("../utils/embeddings");
 const { getIndex } = require("../config/pinecone");
 const { v4: uuidv4 } = require("uuid");
 
 const UPLOADS_DIR = "uploads/";
 
-// ✅ Ensure "uploads/" directory exists
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-// ✅ Initialize uploaded files list from disk
 let uploadedFiles = [];
 
-// 📌 Load existing files from disk when the server starts
 function loadUploadedFiles() {
   uploadedFiles = fs.readdirSync(UPLOADS_DIR).map((filename) => ({
     filename,
@@ -23,36 +20,44 @@ function loadUploadedFiles() {
     timestamp: fs
       .statSync(path.join(UPLOADS_DIR, filename))
       .mtime.toISOString(),
+    dataSourceName: "Unknown",
   }));
   console.log(`🔄 Loaded ${uploadedFiles.length} existing files from disk.`);
 }
-
-// ✅ Call this function to populate `uploadedFiles` at startup
 loadUploadedFiles();
 
-// ✅ Upload PDF Function (Extract Text, Get Embedding, Index in Pinecone)
-async function uploadPDF(req, res) {
+// ✅ Upload any file type
+async function uploadFile(req, res) {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
+    const dataSourceName = req.body.dataSourceName?.trim();
+    if (!dataSourceName) {
+      return res.status(400).json({ error: "Data source name is required" });
+    }
+
     const originalFilename = req.file.originalname.trim();
     const sanitizedFilename = originalFilename.replace(/\s+/g, "_");
-    const fileId = uuidv4(); // ✅ Unique ID for this file
+    const fileId = uuidv4();
     const filePath = path.join(UPLOADS_DIR, sanitizedFilename);
     fs.renameSync(req.file.path, filePath);
 
-    const extractedText = await extractTextFromPDF(filePath);
-    const embedding = await getEmbedding(extractedText);
+    // 🧠 Extract text based on file type
+    const extractedText = await extractTextFromFile(filePath);
+    if (!extractedText || extractedText.trim().length < 20) {
+      return res
+        .status(400)
+        .json({ error: "This file contains no readable text." });
+    }
 
     const index = getIndex();
 
-    // Split text into chunks — e.g., each Q&A block or each line
+    // 🧩 Split and embed
     const chunks = extractedText
-  .split(/\n(?=Q:\s)/) // splits each Q: entry into its own block
-  .map(chunk => chunk.trim())
-  .filter(chunk => chunk.length > 0);
+      .split(/\n(?=Q:\s)/)
+      .map((chunk) => chunk.trim())
+      .filter((chunk) => chunk.length > 0);
 
-    // Store each chunk separately with a unique ID
     for (const chunk of chunks) {
       const chunkId = uuidv4();
       const embedding = await getEmbedding(chunk);
@@ -62,9 +67,10 @@ async function uploadPDF(req, res) {
           id: chunkId,
           values: embedding,
           metadata: {
-            text: chunk,
+            text: chunk.slice(0, 1000),
             filename: sanitizedFilename,
             fileId,
+            dataSourceName,
             timestamp: Date.now(),
           },
         },
@@ -75,6 +81,7 @@ async function uploadPDF(req, res) {
       id: fileId,
       filename: sanitizedFilename,
       path: filePath,
+      dataSourceName,
       timestamp: new Date().toISOString(),
     });
 
@@ -85,12 +92,12 @@ async function uploadPDF(req, res) {
   }
 }
 
-// ✅ List Uploaded Files (Persists After Server Restart)
+// ✅ List uploaded files
 function listUploadedFiles(req, res) {
   return res.json({ files: uploadedFiles });
 }
 
-// ✅ Delete File Function (Removes from Storage & Pinecone)
+// ✅ Delete file
 async function deleteFile(req, res) {
   try {
     const { id } = req.params;
@@ -100,10 +107,9 @@ async function deleteFile(req, res) {
     if (!fileRecord) return res.status(404).json({ error: "File not found" });
 
     const index = getIndex();
-    await index.deleteOne(id); // ✅ Delete by vector ID
+    await index.deleteOne(id);
 
     fs.unlinkSync(fileRecord.path);
-
     uploadedFiles = uploadedFiles.filter((f) => f.id !== id);
 
     return res.json({
@@ -116,5 +122,8 @@ async function deleteFile(req, res) {
   }
 }
 
-// ✅ Export all functions
-module.exports = { uploadPDF, listUploadedFiles, deleteFile };
+module.exports = {
+  uploadFile, // renamed from uploadPDF
+  listUploadedFiles,
+  deleteFile,
+};
